@@ -84,9 +84,3 @@
   })()),
     n()
 })(window, document)
-
-
-作者: ConstOwn
-链接: https://blog.juanertu.com/archives/264a3045.html
-来源: 你真是一个美好的人类
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。

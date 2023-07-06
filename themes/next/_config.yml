@@ -184,8 +184,8 @@ toc:
 
 sidebar:
   # Sidebar Position, available value: left | right (only for Pisces | Gemini).
+  # position: left
   position: left
-  #position: right
 
   # Sidebar Display, available value (only for Muse | Mist):
   #  - post    expand on posts automatically. Default.
@@ -463,7 +463,7 @@ needmoreshare2:
       position: bottomCenter
       networks: Weibo,Wechat,Douban,QQZone,Twitter,Facebook
   float:
-    enable: true
+    enable: false
     options:
       iconStyle: default
       boxForm: vertical
@@ -559,7 +559,7 @@ firestore:
 # Get more information on http://ibruce.info/2015/04/04/busuanzi/
 busuanzi_count:
   # count values only if the other configs are false
-  enable: false
+  enable: true
   # custom uv span for the whole site
   site_uv: true
   site_uv_header: <i class="fa fa-user"></i>
@@ -685,7 +685,7 @@ motion:
 fancybox: true
 
 # Progress bar in the top during page loading.
-pace: false
+pace: true
 # Themes list:
 #pace-theme-big-counter
 #pace-theme-bounce
@@ -826,3 +826,29 @@ version: 5.1.4
 recent_posts_title: 近期文章
 recent_posts_layout: block
 recent_posts: true
+
+
+# 鼠标点击特效
+cursor_effect:
+  enabled: true
+  # fireworks：礼花 | explosion：爆炸 | love：浮出爱心 | text：浮出文字
+  type: love
+
+# 标签页样式 /tags/
+# type: | tagcanvas | color | love | bubble |
+# PS：tagcanvas依赖hexo-tag-cloud插件
+tagcloud:
+  type: bubble # 为空则使用默认标签页
+
+# 分类页样式
+# type: | love | bubble |
+category_style:
+  type: love # 为空则使用默认标签页
+
+# 侧栏自定义时间
+diy_time:
+  runtime:
+    enable: false #运行时间
+    birthday: "08/07/2019 20:00:00"
+  clock:
+    enable: true # 粒子时钟

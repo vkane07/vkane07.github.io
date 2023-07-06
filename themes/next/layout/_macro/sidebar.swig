@@ -109,6 +109,26 @@
             </div>
           {% endif %}
 
+          <!-- 添加近期文章 -->
+          {% if theme.recent_posts %}
+            <div class="links-of-blogroll motion-element {{ "links-of-blogroll-" + theme.recent_posts_layout  }}">
+              <div class="links-of-blogroll-title">
+              <!-- modify icon to fire by szw -->
+                <i class="fa fa-history fa-{{ theme.recent_posts_icon | lower }}" aria-hidden="true"></i>
+                  {{ __('近期文章') }}
+              </div>
+              <ul class="links-of-blogroll-list">
+                {% set posts = site.posts.sort('-date') %}
+                {% for post in posts.slice('0', '5') %}
+                <li>
+                  <a href="{{ url_for(post.path) }}" title="{{ post.title }}" target="_blank">{{ post.title }}</a>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          {% include '../_custom/clock.swig' %}
+
           {% set cc = {'by': 1, 'by-nc': 1, 'by-nc-nd': 1, 'by-nc-sa': 1, 'by-nd': 1, 'by-sa': 1, 'zero': 1} %}
           {% if theme.creative_commons in cc %}
             <div class="cc-license motion-element" itemprop="license">
@@ -169,7 +189,7 @@
           {% endif %}
         </div>
       {% endif %}
-
+    
     </div>
   </aside>
 {% endmacro %}
