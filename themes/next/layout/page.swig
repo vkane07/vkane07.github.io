@@ -8,6 +8,11 @@
     #}{{ __('title.category') + page_title_suffix }}{#
   #}{% elif page.type === "tags" and not page.title %}{#
     #}{{ __('title.tag') + page_title_suffix }}{#
+
+  <!-- 友情链接-->
+  #}{% elif page.type === 'links' and not page.title %}{#
+    #}{{ __('title.links') + page_title_suffix }}{#
+
   #}{% else %}{#
     #}{{ page.title + page_title_suffix }}{#
   #}{% endif %}{#
@@ -33,11 +38,23 @@
             <div class="tag-cloud-title">
                 {{ _p('counter.tag_cloud', site.tags.length) }}
             </div>
-            <div class="tag-cloud-tags">
+            <div class="tag-cloud-tags" hidden>
               {{ tagcloud({min_font: 12, max_font: 30, amount: 300, color: true, start_color: '#ccc', end_color: '#111'}) }}
             </div>
           </div>
-          {% include 'tag-color.swig' %}
+         {% if theme.tagcloud.type == 'tagcanvas' %}
+               {# hexo-tag-cloud插件球型云标签 #}
+               {% include 'tagcanvas.swig' %}
+          {% elif theme.tagcloud.type == 'color' %}
+               {# 彩色标签页 #}
+               {% include 'tag-color.swig' %}
+          {% elif theme.tagcloud.type == 'love' %}
+               {# 自定义爱心标签云 #}
+               {% include 'tag-love.swig' %}
+          {% elif theme.tagcloud.type == 'bubble' %}
+               {# 自定义球型气泡标签云 #}
+               {% include 'tag-bubble.swig' %}
+          {% endif %}
         {% elif page.type === 'categories' %}
           <div class="category-all-page">
             <div class="category-all-title">
@@ -46,7 +63,21 @@
             <div class="category-all">
               {{ list_categories() }}
             </div>
+
+            {% if theme.category_style.type == 'love' %}
+                 {# 爱心分类页 #}
+                 {% include 'category-love.swig' %}
+            {% elif theme.category_style.type == 'bubble' %}
+                 {# 自定义球型气泡分类页 #}
+                 {% include 'category-bubble.swig' %}
+            {% endif %}
+
           </div>
+
+        <!-- 友情链接-->
+        {% elif page.type === 'links' %}
+            {% include 'links.swig' %}
+              
         {% else %}
           {{ page.content }}
         {% endif %}

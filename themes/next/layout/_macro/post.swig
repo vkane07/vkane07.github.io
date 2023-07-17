@@ -61,12 +61,19 @@
         {% endif %}
 
         <div class="post-meta">
-              {% if post.top %}
+          <span class="post-time">
+          {% if post.top %}
                 <i class="fa fa-thumb-tack"></i>
                 <font color=7D26CD>置顶</font>
                 <span class="post-meta-divider">|</span>
               {% endif %}
-          <span class="post-time">
+              {% if post.essential%}
+                 <span class="post-meta-item-icon">
+                     <i class="fa fa-newspaper-o jingping">精品</i>
+                 </span>
+                 <span class="post-meta-divider">|</span>
+             {% endif %}
+
             {% if theme.post_meta.created_at %}
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
@@ -335,6 +342,12 @@
         {{ post.content }}
       {% endif  %}
     </div>
+
+     <!-- 相关文章推荐 -->
+     {% if theme.related_posts.enable and (theme.related_posts.display_in_home or not is_index) %}
+          {% include 'post-related.swig' with { post: post } %}
+     {% endif %}
+
     {#####################}
     {### END POST BODY ###}
     {#####################}
@@ -347,6 +360,12 @@
         {% endif %}
       </div>
     {% endif %}
+
+    <div>
+      {% if not is_index %}
+        {% include 'passage-end-tag.swig' %}
+      {% endif %}
+    </div>
 
     {% if (theme.alipay or theme.wechatpay or theme.bitcoin) and not is_index %}
       <div>
