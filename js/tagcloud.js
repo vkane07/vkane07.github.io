@@ -1,49 +1,44 @@
-function throttle(a, n) {
-	var e = null;
-	return function() {
-		var t = this,
-			s = arguments;
-		clearTimeout(e), e = setTimeout((function() {
-			a.apply(t, s)
-		}), n)
-	}
-}
+ function addLoadEvent(func) {
+     var oldonload = window.onload;
+     if (typeof window.onload != 'function') {
+         window.onload = func;
+     } else {
+         window.onload = function() {
+             oldonload();
+             func();
+         }
+     }
+ }
 
-function loadTagCloud() {
-	try {
-		function a() {
-			var a = $("#resCanvas");
-			a.get(0)
-				.width = 1.2 * a.width(), a.get(0)
-				.height = 1.2 * a.width(), TagCanvas.Start("resCanvas"), TagCanvas.tc.resCanvas.Wheel(!0)
-		}
-		//TagCanvas.textFont = "Helvetica",
-        TagCanvas.textFont = "Georgia,Optima",
-        TagCanvas.textColour = "#ffccff",
-        TagCanvas.textHeight = 16, 
-        TagCanvas.outlineColour = "#cc99ff", 
-        TagCanvas.maxSpeed = 0.15, 
-       // TagCanvas.freezeActive = !0, 
-        TagCanvas.outlineMethod = "block", 
-        TagCanvas.minBrightness = .2, 
-        TagCanvas.depth = .92, 
-        TagCanvas.pulsateTo = .6, 
-        TagCanvas.initial = [.1, -.1], 
-        TagCanvas.decel = .5, 
-        // TagCanvas.reverse = !0, 
-        TagCanvas.reverse = true, 
-        TagCanvas.hideTags = !1, 
-        TagCanvas.shadow = "#C3D6E8", 
-        TagCanvas.shadowBlur = 2, 
-        TagCanvas.weight = !1, 
-        TagCanvas.imageScale = null, 
-        TagCanvas.fadeIn = 500, 
-        TagCanvas.clickToFront = 600, 
-        TagCanvas.lock = !1, a(), $(window)
-			.resize(throttle(a, 500))
-	} catch (a) {
-		console.log(a), document.getElementById("myCanvasContainer")
-			.style.display = "none"
-	}
-}
-document.addEventListener("DOMContentLoaded", loadTagCloud);
+ addLoadEvent(function() {
+     console.log('tag cloud plugin rock and roll!');
+
+     try {
+         TagCanvas.textFont = 'Helvetica';
+         TagCanvas.textColour = '#333';
+         TagCanvas.textHeight = 15;
+         TagCanvas.outlineColour = '#E2E1C1';
+         TagCanvas.maxSpeed = 0.03;
+         TagCanvas.freezeActive = true;
+         TagCanvas.outlineMethod = 'block';
+         TagCanvas.minBrightness = 0.2;
+         TagCanvas.depth = 0.92;
+         TagCanvas.pulsateTo = 0.6;
+         TagCanvas.initial = [0.1,-0.1];
+         TagCanvas.decel = 0.98;
+         TagCanvas.reverse = true;
+         TagCanvas.hideTags = false;
+         TagCanvas.shadow = '#ccf';
+         TagCanvas.shadowBlur = 3;
+         TagCanvas.weight = false;
+         TagCanvas.imageScale = null;
+         TagCanvas.fadeIn = 1000;
+         TagCanvas.clickToFront = 600;
+         TagCanvas.lock = false;
+         TagCanvas.Start('resCanvas');
+         TagCanvas.tc['resCanvas'].Wheel(true)
+     } catch(e) {
+         console.log(e);
+         document.getElementById('myCanvasContainer').style.display = 'none';
+     }
+ });
