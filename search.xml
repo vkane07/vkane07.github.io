@@ -165,8 +165,8 @@
         <category>软件安装</category>
       </categories>
       <tags>
-        <tag>linux</tag>
         <tag>云服务器配置</tag>
+        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
@@ -286,10 +286,10 @@
         <category>博客</category>
       </categories>
       <tags>
+        <tag>linux</tag>
         <tag>NexT</tag>
         <tag>blog</tag>
         <tag>笔记</tag>
-        <tag>linux</tag>
       </tags>
   </entry>
 </search>
