@@ -136,10 +136,17 @@
 <div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">npm run build</span><br></pre></td></tr></table></figure></div>
 
 <p><strong>ps :执行完上述命令则生成dist文件</strong></p>
-<p>2.利用nginx做远程代理</p>
-<p>3.进入Nginx配置文件<code> vim /etc/nginx/nginx.conf</code>做如下配置</p>
-<p><img src="/posts/719102029/images" alt="nginx"></p>
-<p>4.使用命令重启nginx</p>
+<ol start="2">
+<li><p>利用nginx做远程代理</p>
+</li>
+<li><p>进入Nginx配置文件<code> vim /etc/nginx/nginx.conf</code>做如下配置</p>
+</li>
+</ol>
+<p><a href="/images/nginx.png">nginx</a></p>
+<p><img src="/posts/719102029/nginx.png" alt="nginx"></p>
+<ol start="4">
+<li>使用命令重启nginx</li>
+</ol>
 <div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">systemctl restart nginx</span><br></pre></td></tr></table></figure></div>
 
 <ol start="5">
