@@ -138,7 +138,7 @@
 <p><strong>ps :执行完上述命令则生成dist文件</strong></p>
 <p>2.利用nginx做远程代理</p>
 <p>3.进入Nginx配置文件<code> vim /etc/nginx/nginx.conf</code>做如下配置</p>
-<p><img src="/../images/nginx.png" alt="nginx"></p>
+<p><img src="/posts/719102029/nginx.png" alt="nginx"></p>
 <ol start="4">
 <li>使用命令重启nginx</li>
 </ol>
