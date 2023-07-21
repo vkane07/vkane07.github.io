@@ -142,7 +142,7 @@
 <li><p>进入Nginx配置文件<code> vim /etc/nginx/nginx.conf</code>做如下配置</p>
 </li>
 </ol>
-<p><img src="/posts/719102029/_posts" alt="nginx"></p>
+<p><img src="/posts/719102029/images" alt="nginx"></p>
 <p><img src="/posts/719102029/nginx.png" alt="nginx"></p>
 <ol start="4">
 <li>使用命令重启nginx</li>
