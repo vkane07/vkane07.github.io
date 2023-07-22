@@ -1,6 +1,214 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>设计模式调优之单例模式</title>
+    <url>/posts/279951034.html</url>
+    <content><![CDATA[<p>如何创建单一对象优化系统性能？</p>
+<p>在《Design Patterns: Elements of Reusable Object-Oriented Software》一书中，有 23 种设计模式的描述，其中，单例设计模式是最常用的设计模式之一。无论是在开源框架，还是在我们的日常开发中，单例模式几乎无处不在。</p>
+<h2 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h2><p>什么是单例模式？它的核心在于，单例模式可以保证一个类仅创建一个实例，并提供一个访问它的全局访问点。该模式有三个基本要点：一是这个类只能有一个实例；二是它必须自行创建这个实例；三是它必须自行向整个系统提供这个实例。结合这三点，我们来实现一个简单的单例：</p>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//饿汉模式</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance=<span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//自行创建实例</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>由于在一个系统中，一个类经常会被使用在不同的地方，通过单例模式，我们可以避免多次创建多个实例，从而节约系统资源。</p>
+<h3 id="饿汉模式"><a href="#饿汉模式" class="headerlink" title="饿汉模式"></a>饿汉模式</h3><p>我们可以发现，以上第一种实现单例的代码中，使用了 static 修饰了成员变量 instance，所以该变量会在类初始化的过程中被收集进类构造器即 方法中。在多线程场景下，JVM 会保证只有一个线程能执行该类的 方法，其它线程将会被阻塞等待。</p>
+<p>等到唯一的一次 方法执行完成，其它线程将不会再执行 方法，转而执行自己的代码。也就是说，static 修饰了成员变量 instance，在多线程的情况下能保证只实例化一次。</p>
+<p>这种方式实现的单例模式，在类初始化阶段就已经在堆内存中开辟了一块内存，用于存放实例化对象，所以也称为饿汉模式。</p>
+<p><strong>饿汉模式实现的单例的优点:</strong></p>
+<ul>
+<li>保证多线程情况下实例的唯一性</li>
+<li>getInstance 直接返回唯一实例，性能非常高。</li>
+</ul>
+<p>饿汉模式实现的单例的缺点:</p>
+<ul>
+<li>在类成员变量比较多，或变量比较大的情况下，这种模式可能会在没有使用类对象的情况下，一直占用堆内存</li>
+</ul>
+<p><strong>ps:</strong> 试想下，如果一个第三方开源框架中的类都是基于饿汉模式实现的单例，这将会初始化所有单例类，无疑是灾难性的。</p>
+<h3 id="懒汉模式"><a href="#懒汉模式" class="headerlink" title="懒汉模式"></a>懒汉模式</h3><p>懒汉模式就是为了避免直接加载类对象时提前创建对象的一种单例设计模式。该模式使用懒加载方式，只有当系统使用到类对象时，才会将实例加载到堆内存中。通过以下代码，我们可以简单地了解下懒加载的实现方式：</p>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance= <span class="literal">null</span>;<span class="comment">//不实例化</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//当instance为null时，则实例化对象，否则直接返回对象</span></span><br><span class="line">            instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//实例化对象</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;<span class="comment">//返回已存在的对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>以上代码</strong>在单线程下运行是没有问题的，但要<strong>运行在多线程下，就会出现实例化多个类对象的情况</strong>。这是怎么回事呢？</p>
+<p>当线程 A 进入到 if 判断条件后，开始实例化对象，此时 instance 依然为 null；又有线程 B 进入到 if 判断条件中，之后也会通过条件判断，进入到方法里面创建一个实例对象。所以我们需要对该方法进行加锁，保证多线程情况下仅创建一个实例。这里我们<strong>使用 Synchronized 同步锁来修饰 getInstance 方法</strong>：</p>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式 + synchronized同步锁</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance= <span class="literal">null</span>;<span class="comment">//不实例化</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//加同步锁，通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//当instance为null时，则实例化对象，否则直接返回对象</span></span><br><span class="line">            instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//实例化对象</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;<span class="comment">//返回已存在的对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>但我们前面讲过，同步锁会增加锁竞争，带来系统性能开销，从而导致系统性能下降，因此这种方式也会降低单例模式的性能。</p>
+<p>还有，每次请求获取类对象时，都会通过 getInstance() 方法获取，除了第一次为 null，其它每次请求基本都是不为 null 的。在没有加同步锁之前，是因为 if 判断条件为 null 时，才导致创建了多个实例。基于以上两点，我们可以考虑<strong>将同步锁放在 if 条件里面</strong>，这样就可以减少同步锁资源竞争。</p>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式 + synchronized同步锁</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance= <span class="literal">null</span>;<span class="comment">//不实例化</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//加同步锁，通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//当instance为null时，则实例化对象，否则直接返回对象</span></span><br><span class="line">          <span class="keyword">synchronized</span> (Singleton.class)&#123;</span><br><span class="line">              instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//实例化对象</span></span><br><span class="line">          &#125; </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;<span class="comment">//返回已存在的对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>看到这里，你是不是觉得这样就可以了呢？答案是<strong>依然会创建多个实例</strong>。这<strong>是因为当多个线程进入到 if 判断条件里，虽然有同步锁，但是进入到判断条件里面的线程依然会依次获取到锁创建对象，然后再释放同步锁</strong>。所以我们还需要在同步锁里面再加一个判断条件：</p>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式 + synchronized同步锁 + double-check</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance= <span class="literal">null</span>;<span class="comment">//不实例化</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//加同步锁，通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//第一次判断，当instance为null时，则实例化对象，否则直接返回对象</span></span><br><span class="line">          <span class="keyword">synchronized</span> (Singleton.class)&#123;<span class="comment">//同步锁</span></span><br><span class="line">             <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//第二次判断</span></span><br><span class="line">                instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//实例化对象</span></span><br><span class="line">             &#125;</span><br><span class="line">          &#125; </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;<span class="comment">//返回已存在的对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>以上这种方式，通常被称为 <strong>Double-Check</strong>，它可以大大提高支持多线程的懒汉模式的运行性能。那这样做是不是就能保证万无一失了呢？还会有什么问题吗？</p>
+<p>其实这里又跟 Happens-Before 规则和重排序扯上关系了，这里我们先来简单了解下 Happens-Before 规则和重排序。</p>
+<p>编译器为了尽可能地减少寄存器的读取、存储次数，会充分复用寄存器的存储值，比如以下代码，如果没有进行重排序优化，正常的执行顺序是步骤 1&#x2F;2&#x2F;3，而在编译期间进行了重排序优化之后，执行的步骤有可能就变成了步骤 1&#x2F;3&#x2F;2，这样就能减少一次寄存器的存取次数。</p>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">1</span>;<span class="comment">//步骤1：加载a变量的内存地址到寄存器中，加载1到寄存器中，CPU通过mov指令把1写入到寄存器指定的内存中</span></span><br><span class="line"><span class="type">int</span> <span class="variable">b</span> <span class="operator">=</span> <span class="number">2</span>;<span class="comment">//步骤2 加载b变量的内存地址到寄存器中，加载2到寄存器中，CPU通过mov指令把2写入到寄存器指定的内存中</span></span><br><span class="line">a = a + <span class="number">1</span>;<span class="comment">//步骤3 重新加载a变量的内存地址到寄存器中，加载1到寄存器中，CPU通过mov指令把1写入到寄存器指定的内存中</span></span><br></pre></td></tr></table></figure></div>
+
+<p><strong>在 JMM 中，重排序是十分重要的一环，特别是在并发编程中</strong>。如果 JVM 可以对它们进行任意排序以提高程序性能，也可能会给并发编程带来一系列的问题。例如，我上面讲到的 Double-Check 的单例问题，假设类中有其它的属性也需要实例化，这个时候，除了要实例化单例类本身，还需要对其它属性也进行实例化：</p>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式 + synchronized同步锁 + double-check</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance= <span class="literal">null</span>;<span class="comment">//不实例化</span></span><br><span class="line">    <span class="keyword">public</span> List&lt;String&gt; list = <span class="literal">null</span>;<span class="comment">//list属性</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;</span><br><span class="line">      list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();</span><br><span class="line">    &#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//加同步锁，通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//第一次判断，当instance为null时，则实例化对象，否则直接返回对象</span></span><br><span class="line">          <span class="keyword">synchronized</span> (Singleton.class)&#123;<span class="comment">//同步锁</span></span><br><span class="line">             <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//第二次判断</span></span><br><span class="line">                instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//实例化对象</span></span><br><span class="line">             &#125;</span><br><span class="line">          &#125; </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;<span class="comment">//返回已存在的对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>在执行 instance &#x3D; new Singleton(); 代码时，正常情况下，实例过程这样的：</p>
+<ul>
+<li><p>给 Singleton 分配内存；</p>
+</li>
+<li><p>调用 Singleton 的构造函数来初始化成员变量；</p>
+</li>
+<li><p>将 Singleton 对象指向分配的内存空间（执行完这步 singleton 就为非 null 了）。</p>
+</li>
+</ul>
+<p>如果虚拟机发生了重排序优化，这个时候步骤 3 可能发生在步骤 2 之前。如果初始化线程刚好完成步骤 3，而步骤 2 没有进行时，则刚好有另一个线程到了第一次判断，这个时候判断为非 null，并返回对象使用，这个时候实际没有完成其它属性的构造，因此使用这个属性就很可能会导致异常。在这里，Synchronized 只能保证可见性、原子性，无法保证执行的顺序。</p>
+<p>这个时候，就体现出 Happens-Before 规则的重要性了。通过字面意思，你可能会误以为是前一个操作发生在后一个操作之前。然而真正的意思是，前一个操作的结果可以被后续的操作获取。这条规则规范了编译器对程序的重排序优化。</p>
+<p>我们知道 volatile 关键字可以保证线程间变量的可见性，简单地说就是当线程 A 对变量 X 进行修改后，在线程 A 后面执行的其它线程就能看到变量 X 的变动。除此之外，volatile 在 JDK1.5 之后还有一个作用就是阻止局部重排序的发生，也就是说，volatile 变量的操作指令都不会被重排序。所以使用 volatile 修饰 instance 之后，Double-Check 懒汉单例模式就万无一失了。</p>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式 + synchronized同步锁 + double-check</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">static</span> Singleton instance= <span class="literal">null</span>;<span class="comment">//不实例化</span></span><br><span class="line">    <span class="keyword">public</span> List&lt;String&gt; list = <span class="literal">null</span>;<span class="comment">//list属性</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;</span><br><span class="line">      list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();</span><br><span class="line">    &#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//加同步锁，通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//第一次判断，当instance为null时，则实例化对象，否则直接返回对象</span></span><br><span class="line">          <span class="keyword">synchronized</span> (Singleton.class)&#123;<span class="comment">//同步锁</span></span><br><span class="line">             <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//第二次判断</span></span><br><span class="line">                instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//实例化对象</span></span><br><span class="line">             &#125;</span><br><span class="line">          &#125; </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;<span class="comment">//返回已存在的对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="通过内部类实现"><a href="#通过内部类实现" class="headerlink" title="通过内部类实现"></a>通过内部类实现</h3><p>以上这种同步锁 +Double-Check 的实现方式相对来说，复杂且加了同步锁，那有没有稍微简单一点儿的可以实现线程安全的懒加载方式呢？</p>
+<p>我们知道，在饿汉模式中，我们使用了 static 修饰了成员变量 instance，所以该变量会在类初始化的过程中被收集进类构造器即<code>&lt;clinit&gt;</code>方法中。在多线程场景下，JVM 会保证只有一个线程能执行该类的<code>&lt;clinit&gt;</code>方法，其它线程将会被阻塞等待。这种方式可以保证内存的可见性、顺序性以及原子性。</p>
+<p>如果我们在 Singleton 类中创建一个内部类来实现成员变量的初始化，则可以避免多线程下重复创建对象的情况发生。这种方式，只有在第一次调用 getInstance() 方法时，才会加载 InnerSingleton 类，而只有在加载 InnerSingleton 类之后，才会实例化创建对象。具体实现如下：</p>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式 内部类实现</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">  <span class="keyword">public</span> List&lt;String&gt; list = <span class="literal">null</span>;<span class="comment">// list属性</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span> &#123;<span class="comment">//构造函数</span></span><br><span class="line">    list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 内部类实现</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">InnerSingleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance=<span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//自行创建实例</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> InnerSingleton.instance;<span class="comment">// 返回内部类中的静态变量</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>使用枚举来实现单例模式</strong>，具体代码如下：</p>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SinletonExample</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">SinletonExample</span> <span class="variable">instance</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 私有构造函数</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">SinletonExample</span><span class="params">()</span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> SinletonExample <span class="title function_">getInstance</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Sinleton.SINLETON.getInstance();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">enum</span> <span class="title class_">Sinleton</span>&#123;</span><br><span class="line">        SINLETON;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> SinletonExample singleton;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// JVM保证这个方法只调用一次</span></span><br><span class="line">        Sinleton()&#123;</span><br><span class="line">            singleton = <span class="keyword">new</span> <span class="title class_">SinletonExample</span>();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> SinletonExample <span class="title function_">getInstance</span><span class="params">()</span>&#123;</span><br><span class="line">            <span class="keyword">return</span> singleton;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>单例的实现方式其实有很多，但总结起来就两种：饿汉模式和懒汉模式，我们可以根据自己的需求来做选择。</p>
+<p>如果我们在程序启动后，一定会加载到类，那么用饿汉模式实现的单例简单又实用；如果我们是写一些工具类，则优先考虑使用懒汉模式，因为很多项目可能会引用到 jar 包，但未必会使用到这个工具类，<strong>懒汉模式实现的单例可以避免提前被加载到内存中，占用系统资源</strong>。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java性能调优</tag>
+        <tag>设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Git配置</title>
+    <url>/posts/279951033.html</url>
+    <content><![CDATA[<h2 id="Git-常用命令"><a href="#Git-常用命令" class="headerlink" title="Git 常用命令"></a>Git 常用命令</h2><ul>
+<li>查看git 配置的username和邮箱</li>
+</ul>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git config --global --list</span></span><br></pre></td></tr></table></figure></div>
+
+<p>若出现<code>git@github.com: Permission denied (publickey).</code>问题，在github 设置中配置当台主机的<code>id_rsa.pub</code>即可，目录一般在<code>C:\Users\.ssh</code>下</p>
+]]></content>
+      <categories>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>yun</title>
+    <url>/posts/1545816865.html</url>
+    <content><![CDATA[<p>图片</p>
+<p><img src="/posts/1545816865/nginx.png" alt="nginx"></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>云服务器配置</title>
+    <url>/posts/719102029.html</url>
+    <content><![CDATA[<p>云服务器配置</p>
+<h3 id="mysql启动"><a href="#mysql启动" class="headerlink" title="mysql启动"></a>mysql启动</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> ..</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">/etc/init.d/mysql start <span class="comment">#启动mysql</span></span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="redis位置"><a href="#redis位置" class="headerlink" title="redis位置"></a>redis位置</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> ..</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> /usr/local/redis/bin</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="redis启动"><a href="#redis启动" class="headerlink" title="redis启动"></a>redis启动</h3><p>在上述位置输入如下命令</p>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./redis-server ../redis.conf <span class="comment">#redis后台启动</span></span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="nginx安装"><a href="#nginx安装" class="headerlink" title="nginx安装"></a>nginx安装</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">yum install nginx -y</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="nginx位置"><a href="#nginx位置" class="headerlink" title="nginx位置"></a>nginx位置</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> /etc/nginx/nginx.conf</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="springboot项目部署远端服务器"><a href="#springboot项目部署远端服务器" class="headerlink" title="springboot项目部署远端服务器"></a>springboot项目部署远端服务器</h3><ol>
+<li><p>先使用<code>mvn clean</code>清除缓存</p>
+</li>
+<li><p>通过如下命令打包jar包：</p>
+</li>
+</ol>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">mvn package -DskipTests=<span class="literal">true</span></span><br></pre></td></tr></table></figure></div>
+
+<ol start="3">
+<li>将本地打包好的jar包部署到远程服务器</li>
+<li>启动命令，使用如下命令运行jar包：</li>
+</ol>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">nohup</span> jar -jar jar包名 &amp;</span><br></pre></td></tr></table></figure></div>
+
+<blockquote>
+<p><strong>注：nohup加上&amp;表示项目可以在后台永久的执行</strong>，即使关闭xshell终端也不会停止。若想停止，可直接结束该项目端口占用的进程。</p>
+<p>以上命令执行后会提示“nohup:ignoring input and appending output to ‘nohup.out’”,这是正常的，不是错误提示，直接打回车即可。产生原因是<code>nohup</code>默认会把标准输出重定向到默认文件<code>nohup.out</code>中，也可以自定义该输出文件，如<code>nohup java -jar jar包 &gt;temp.txt &amp;</code></p>
+</blockquote>
+<ol start="5">
+<li>Next博客jar位置：服务器<code>114.55.112.191</code>下&#x2F;home&#x2F;web</li>
+</ol>
+<h3 id="前端项目部署远端服务器"><a href="#前端项目部署远端服务器" class="headerlink" title="前端项目部署远端服务器"></a>前端项目部署远端服务器</h3><ol>
+<li>vue项目使用如下命令生成目标文件：</li>
+</ol>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">npm run build</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>ps :执行完上述命令则生成dist文件</strong></p>
+<ol start="2">
+<li><p>利用nginx做远程代理</p>
+</li>
+<li><p>进入Nginx配置文件<code> vim /etc/nginx/nginx.conf</code>做如下配置</p>
+</li>
+</ol>
+<p><img src="/images/nginx.png" alt="nginx"></p>
+<p><img src="/../images/tt.png" alt="nginx1"></p>
+<ol start="4">
+<li>使用命令重启nginx</li>
+</ol>
+<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">systemctl restart nginx</span><br></pre></td></tr></table></figure></div>
+
+<ol start="5">
+<li>阿里云服务器安全规则配置端口，开启5370、5371两端口</li>
+</ol>
+<h3 id="Nginx常用命令"><a href="#Nginx常用命令" class="headerlink" title="Nginx常用命令"></a>Nginx常用命令</h3><h3 id="nginx相关命令"><a href="#nginx相关命令" class="headerlink" title="nginx相关命令"></a>nginx相关命令</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl start nginx</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl stop nginx</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl restart nginx</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl reload nginx</span></span><br><span class="line">或</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">service nginx start</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">service nginx stop</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">service nginx restart</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看Nginx安装位置</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">which</span> nginx</span></span><br></pre></td></tr></table></figure></div>
+
+<blockquote>
+<p>nginx端口开放后，需登陆<a href="https://ecs.console.aliyun.com/securityGroupDetail/region/cn-hangzhou/groupId/sg-bp1hun17u4gm7a2r255x/detail/intranetIngress">ECS阿里云控制中心</a>安全组开放登陆端口</p>
+<p>云服务器中:</p>
+<ul>
+<li>后台接口前端包位置：&#x2F;home&#x2F;web&#x2F;dist</li>
+<li>view展示前端包位置：&#x2F;home&#x2F;web&#x2F;viewweb&#x2F;dist</li>
+</ul>
+<p>nginx blog前端接口层开放端口：5370</p>
+<p>nginx blog前端展示层开放端口：5371</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>软件安装</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+        <tag>云服务器配置</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hello World</title>
+    <url>/posts/1243066710.html</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure></div>
+
+<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure></div>
+
+<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure></div>
+
+<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure></div>
+
+<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+<p><img src="/images/nginx.png" alt="nginx"></p>
+]]></content>
+      <categories>
+        <category>博客</category>
+      </categories>
+      <tags>
+        <tag>密码学</tag>
+        <tag>计算机</tag>
+        <tag>linux1</tag>
+        <tag>computer</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>my first blog</title>
     <url>/posts/3594205455.html</url>
     <content><![CDATA[<h2 id="安装Node-js"><a href="#安装Node-js" class="headerlink" title="安装Node js"></a>安装Node js</h2><h3 id="安装nvm"><a href="#安装nvm" class="headerlink" title="安装nvm"></a>安装nvm</h3><p>下载<code>nvm-setup.exe</code>安装包，解压安装。安装目录（最好非C盘）。</p>
@@ -94,214 +302,6 @@
         <tag>blog</tag>
         <tag>笔记</tag>
         <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Git配置</title>
-    <url>/posts/279951033.html</url>
-    <content><![CDATA[<h2 id="Git-常用命令"><a href="#Git-常用命令" class="headerlink" title="Git 常用命令"></a>Git 常用命令</h2><ul>
-<li>查看git 配置的username和邮箱</li>
-</ul>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git config --global --list</span></span><br></pre></td></tr></table></figure></div>
-
-<p>若出现<code>git@github.com: Permission denied (publickey).</code>问题，在github 设置中配置当台主机的<code>id_rsa.pub</code>即可，目录一般在<code>C:\Users\.ssh</code>下</p>
-]]></content>
-      <categories>
-        <category>工具</category>
-      </categories>
-      <tags>
-        <tag>git</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hello World</title>
-    <url>/posts/1243066710.html</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure></div>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure></div>
-
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure></div>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure></div>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-<p><img src="/images/nginx.png" alt="nginx"></p>
-]]></content>
-      <categories>
-        <category>博客</category>
-      </categories>
-      <tags>
-        <tag>密码学</tag>
-        <tag>计算机</tag>
-        <tag>linux1</tag>
-        <tag>computer</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>云服务器配置</title>
-    <url>/posts/719102029.html</url>
-    <content><![CDATA[<p>云服务器配置</p>
-<h3 id="mysql启动"><a href="#mysql启动" class="headerlink" title="mysql启动"></a>mysql启动</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> ..</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">/etc/init.d/mysql start <span class="comment">#启动mysql</span></span></span><br></pre></td></tr></table></figure></div>
-
-<h3 id="redis位置"><a href="#redis位置" class="headerlink" title="redis位置"></a>redis位置</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> ..</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> /usr/local/redis/bin</span></span><br></pre></td></tr></table></figure></div>
-
-<h3 id="redis启动"><a href="#redis启动" class="headerlink" title="redis启动"></a>redis启动</h3><p>在上述位置输入如下命令</p>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./redis-server ../redis.conf <span class="comment">#redis后台启动</span></span></span><br></pre></td></tr></table></figure></div>
-
-<h3 id="nginx安装"><a href="#nginx安装" class="headerlink" title="nginx安装"></a>nginx安装</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">yum install nginx -y</span></span><br></pre></td></tr></table></figure></div>
-
-<h3 id="nginx位置"><a href="#nginx位置" class="headerlink" title="nginx位置"></a>nginx位置</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> /etc/nginx/nginx.conf</span></span><br></pre></td></tr></table></figure></div>
-
-<h3 id="springboot项目部署远端服务器"><a href="#springboot项目部署远端服务器" class="headerlink" title="springboot项目部署远端服务器"></a>springboot项目部署远端服务器</h3><ol>
-<li><p>先使用<code>mvn clean</code>清除缓存</p>
-</li>
-<li><p>通过如下命令打包jar包：</p>
-</li>
-</ol>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">mvn package -DskipTests=<span class="literal">true</span></span><br></pre></td></tr></table></figure></div>
-
-<ol start="3">
-<li>将本地打包好的jar包部署到远程服务器</li>
-<li>启动命令，使用如下命令运行jar包：</li>
-</ol>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">nohup</span> jar -jar jar包名 &amp;</span><br></pre></td></tr></table></figure></div>
-
-<blockquote>
-<p><strong>注：nohup加上&amp;表示项目可以在后台永久的执行</strong>，即使关闭xshell终端也不会停止。若想停止，可直接结束该项目端口占用的进程。</p>
-<p>以上命令执行后会提示“nohup:ignoring input and appending output to ‘nohup.out’”,这是正常的，不是错误提示，直接打回车即可。产生原因是<code>nohup</code>默认会把标准输出重定向到默认文件<code>nohup.out</code>中，也可以自定义该输出文件，如<code>nohup java -jar jar包 &gt;temp.txt &amp;</code></p>
-</blockquote>
-<ol start="5">
-<li>Next博客jar位置：服务器<code>114.55.112.191</code>下&#x2F;home&#x2F;web</li>
-</ol>
-<h3 id="前端项目部署远端服务器"><a href="#前端项目部署远端服务器" class="headerlink" title="前端项目部署远端服务器"></a>前端项目部署远端服务器</h3><ol>
-<li>vue项目使用如下命令生成目标文件：</li>
-</ol>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">npm run build</span><br></pre></td></tr></table></figure></div>
-
-<p><strong>ps :执行完上述命令则生成dist文件</strong></p>
-<ol start="2">
-<li><p>利用nginx做远程代理</p>
-</li>
-<li><p>进入Nginx配置文件<code> vim /etc/nginx/nginx.conf</code>做如下配置</p>
-</li>
-</ol>
-<p><img src="/images/nginx.png" alt="nginx"></p>
-<p><img src="/../images/nginx.png" alt="nginx"></p>
-<ol start="4">
-<li>使用命令重启nginx</li>
-</ol>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="BASH"><figure class="iseeu highlight /bash"><table><tr><td class="code"><pre><span class="line">systemctl restart nginx</span><br></pre></td></tr></table></figure></div>
-
-<ol start="5">
-<li>阿里云服务器安全规则配置端口，开启5370、5371两端口</li>
-</ol>
-<h3 id="Nginx常用命令"><a href="#Nginx常用命令" class="headerlink" title="Nginx常用命令"></a>Nginx常用命令</h3><h3 id="nginx相关命令"><a href="#nginx相关命令" class="headerlink" title="nginx相关命令"></a>nginx相关命令</h3><div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="SHELL"><figure class="iseeu highlight /shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl start nginx</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl stop nginx</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl restart nginx</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl reload nginx</span></span><br><span class="line">或</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">service nginx start</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">service nginx stop</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">service nginx restart</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看Nginx安装位置</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">which</span> nginx</span></span><br></pre></td></tr></table></figure></div>
-
-<blockquote>
-<p>nginx端口开放后，需登陆<a href="https://ecs.console.aliyun.com/securityGroupDetail/region/cn-hangzhou/groupId/sg-bp1hun17u4gm7a2r255x/detail/intranetIngress">ECS阿里云控制中心</a>安全组开放登陆端口</p>
-<p>云服务器中:</p>
-<ul>
-<li>后台接口前端包位置：&#x2F;home&#x2F;web&#x2F;dist</li>
-<li>view展示前端包位置：&#x2F;home&#x2F;web&#x2F;viewweb&#x2F;dist</li>
-</ul>
-<p>nginx blog前端接口层开放端口：5370</p>
-<p>nginx blog前端展示层开放端口：5371</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>软件安装</category>
-      </categories>
-      <tags>
-        <tag>linux</tag>
-        <tag>云服务器配置</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>yun</title>
-    <url>/posts/1545816865.html</url>
-    <content><![CDATA[<p>图片</p>
-<p><img src="/posts/1545816865/nginx.png" alt="nginx"></p>
-]]></content>
-  </entry>
-  <entry>
-    <title>设计模式调优之单例模式</title>
-    <url>/posts/279951034.html</url>
-    <content><![CDATA[<p>如何创建单一对象优化系统性能？</p>
-<p>在《Design Patterns: Elements of Reusable Object-Oriented Software》一书中，有 23 种设计模式的描述，其中，单例设计模式是最常用的设计模式之一。无论是在开源框架，还是在我们的日常开发中，单例模式几乎无处不在。</p>
-<h2 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h2><p>什么是单例模式？它的核心在于，单例模式可以保证一个类仅创建一个实例，并提供一个访问它的全局访问点。该模式有三个基本要点：一是这个类只能有一个实例；二是它必须自行创建这个实例；三是它必须自行向整个系统提供这个实例。结合这三点，我们来实现一个简单的单例：</p>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//饿汉模式</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance=<span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//自行创建实例</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
-
-<p>由于在一个系统中，一个类经常会被使用在不同的地方，通过单例模式，我们可以避免多次创建多个实例，从而节约系统资源。</p>
-<h3 id="饿汉模式"><a href="#饿汉模式" class="headerlink" title="饿汉模式"></a>饿汉模式</h3><p>我们可以发现，以上第一种实现单例的代码中，使用了 static 修饰了成员变量 instance，所以该变量会在类初始化的过程中被收集进类构造器即 方法中。在多线程场景下，JVM 会保证只有一个线程能执行该类的 方法，其它线程将会被阻塞等待。</p>
-<p>等到唯一的一次 方法执行完成，其它线程将不会再执行 方法，转而执行自己的代码。也就是说，static 修饰了成员变量 instance，在多线程的情况下能保证只实例化一次。</p>
-<p>这种方式实现的单例模式，在类初始化阶段就已经在堆内存中开辟了一块内存，用于存放实例化对象，所以也称为饿汉模式。</p>
-<p><strong>饿汉模式实现的单例的优点:</strong></p>
-<ul>
-<li>保证多线程情况下实例的唯一性</li>
-<li>getInstance 直接返回唯一实例，性能非常高。</li>
-</ul>
-<p>饿汉模式实现的单例的缺点:</p>
-<ul>
-<li>在类成员变量比较多，或变量比较大的情况下，这种模式可能会在没有使用类对象的情况下，一直占用堆内存</li>
-</ul>
-<p><strong>ps:</strong> 试想下，如果一个第三方开源框架中的类都是基于饿汉模式实现的单例，这将会初始化所有单例类，无疑是灾难性的。</p>
-<h3 id="懒汉模式"><a href="#懒汉模式" class="headerlink" title="懒汉模式"></a>懒汉模式</h3><p>懒汉模式就是为了避免直接加载类对象时提前创建对象的一种单例设计模式。该模式使用懒加载方式，只有当系统使用到类对象时，才会将实例加载到堆内存中。通过以下代码，我们可以简单地了解下懒加载的实现方式：</p>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance= <span class="literal">null</span>;<span class="comment">//不实例化</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//当instance为null时，则实例化对象，否则直接返回对象</span></span><br><span class="line">            instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//实例化对象</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;<span class="comment">//返回已存在的对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
-
-<p><strong>以上代码</strong>在单线程下运行是没有问题的，但要<strong>运行在多线程下，就会出现实例化多个类对象的情况</strong>。这是怎么回事呢？</p>
-<p>当线程 A 进入到 if 判断条件后，开始实例化对象，此时 instance 依然为 null；又有线程 B 进入到 if 判断条件中，之后也会通过条件判断，进入到方法里面创建一个实例对象。所以我们需要对该方法进行加锁，保证多线程情况下仅创建一个实例。这里我们<strong>使用 Synchronized 同步锁来修饰 getInstance 方法</strong>：</p>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式 + synchronized同步锁</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance= <span class="literal">null</span>;<span class="comment">//不实例化</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//加同步锁，通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//当instance为null时，则实例化对象，否则直接返回对象</span></span><br><span class="line">            instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//实例化对象</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;<span class="comment">//返回已存在的对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
-
-<p>但我们前面讲过，同步锁会增加锁竞争，带来系统性能开销，从而导致系统性能下降，因此这种方式也会降低单例模式的性能。</p>
-<p>还有，每次请求获取类对象时，都会通过 getInstance() 方法获取，除了第一次为 null，其它每次请求基本都是不为 null 的。在没有加同步锁之前，是因为 if 判断条件为 null 时，才导致创建了多个实例。基于以上两点，我们可以考虑<strong>将同步锁放在 if 条件里面</strong>，这样就可以减少同步锁资源竞争。</p>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式 + synchronized同步锁</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance= <span class="literal">null</span>;<span class="comment">//不实例化</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//加同步锁，通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//当instance为null时，则实例化对象，否则直接返回对象</span></span><br><span class="line">          <span class="keyword">synchronized</span> (Singleton.class)&#123;</span><br><span class="line">              instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//实例化对象</span></span><br><span class="line">          &#125; </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;<span class="comment">//返回已存在的对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
-
-<p>看到这里，你是不是觉得这样就可以了呢？答案是<strong>依然会创建多个实例</strong>。这<strong>是因为当多个线程进入到 if 判断条件里，虽然有同步锁，但是进入到判断条件里面的线程依然会依次获取到锁创建对象，然后再释放同步锁</strong>。所以我们还需要在同步锁里面再加一个判断条件：</p>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式 + synchronized同步锁 + double-check</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance= <span class="literal">null</span>;<span class="comment">//不实例化</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//加同步锁，通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//第一次判断，当instance为null时，则实例化对象，否则直接返回对象</span></span><br><span class="line">          <span class="keyword">synchronized</span> (Singleton.class)&#123;<span class="comment">//同步锁</span></span><br><span class="line">             <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//第二次判断</span></span><br><span class="line">                instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//实例化对象</span></span><br><span class="line">             &#125;</span><br><span class="line">          &#125; </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;<span class="comment">//返回已存在的对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
-
-<p>以上这种方式，通常被称为 <strong>Double-Check</strong>，它可以大大提高支持多线程的懒汉模式的运行性能。那这样做是不是就能保证万无一失了呢？还会有什么问题吗？</p>
-<p>其实这里又跟 Happens-Before 规则和重排序扯上关系了，这里我们先来简单了解下 Happens-Before 规则和重排序。</p>
-<p>编译器为了尽可能地减少寄存器的读取、存储次数，会充分复用寄存器的存储值，比如以下代码，如果没有进行重排序优化，正常的执行顺序是步骤 1&#x2F;2&#x2F;3，而在编译期间进行了重排序优化之后，执行的步骤有可能就变成了步骤 1&#x2F;3&#x2F;2，这样就能减少一次寄存器的存取次数。</p>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">1</span>;<span class="comment">//步骤1：加载a变量的内存地址到寄存器中，加载1到寄存器中，CPU通过mov指令把1写入到寄存器指定的内存中</span></span><br><span class="line"><span class="type">int</span> <span class="variable">b</span> <span class="operator">=</span> <span class="number">2</span>;<span class="comment">//步骤2 加载b变量的内存地址到寄存器中，加载2到寄存器中，CPU通过mov指令把2写入到寄存器指定的内存中</span></span><br><span class="line">a = a + <span class="number">1</span>;<span class="comment">//步骤3 重新加载a变量的内存地址到寄存器中，加载1到寄存器中，CPU通过mov指令把1写入到寄存器指定的内存中</span></span><br></pre></td></tr></table></figure></div>
-
-<p><strong>在 JMM 中，重排序是十分重要的一环，特别是在并发编程中</strong>。如果 JVM 可以对它们进行任意排序以提高程序性能，也可能会给并发编程带来一系列的问题。例如，我上面讲到的 Double-Check 的单例问题，假设类中有其它的属性也需要实例化，这个时候，除了要实例化单例类本身，还需要对其它属性也进行实例化：</p>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式 + synchronized同步锁 + double-check</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance= <span class="literal">null</span>;<span class="comment">//不实例化</span></span><br><span class="line">    <span class="keyword">public</span> List&lt;String&gt; list = <span class="literal">null</span>;<span class="comment">//list属性</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;</span><br><span class="line">      list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();</span><br><span class="line">    &#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//加同步锁，通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//第一次判断，当instance为null时，则实例化对象，否则直接返回对象</span></span><br><span class="line">          <span class="keyword">synchronized</span> (Singleton.class)&#123;<span class="comment">//同步锁</span></span><br><span class="line">             <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//第二次判断</span></span><br><span class="line">                instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//实例化对象</span></span><br><span class="line">             &#125;</span><br><span class="line">          &#125; </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;<span class="comment">//返回已存在的对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
-
-<p>在执行 instance &#x3D; new Singleton(); 代码时，正常情况下，实例过程这样的：</p>
-<ul>
-<li><p>给 Singleton 分配内存；</p>
-</li>
-<li><p>调用 Singleton 的构造函数来初始化成员变量；</p>
-</li>
-<li><p>将 Singleton 对象指向分配的内存空间（执行完这步 singleton 就为非 null 了）。</p>
-</li>
-</ul>
-<p>如果虚拟机发生了重排序优化，这个时候步骤 3 可能发生在步骤 2 之前。如果初始化线程刚好完成步骤 3，而步骤 2 没有进行时，则刚好有另一个线程到了第一次判断，这个时候判断为非 null，并返回对象使用，这个时候实际没有完成其它属性的构造，因此使用这个属性就很可能会导致异常。在这里，Synchronized 只能保证可见性、原子性，无法保证执行的顺序。</p>
-<p>这个时候，就体现出 Happens-Before 规则的重要性了。通过字面意思，你可能会误以为是前一个操作发生在后一个操作之前。然而真正的意思是，前一个操作的结果可以被后续的操作获取。这条规则规范了编译器对程序的重排序优化。</p>
-<p>我们知道 volatile 关键字可以保证线程间变量的可见性，简单地说就是当线程 A 对变量 X 进行修改后，在线程 A 后面执行的其它线程就能看到变量 X 的变动。除此之外，volatile 在 JDK1.5 之后还有一个作用就是阻止局部重排序的发生，也就是说，volatile 变量的操作指令都不会被重排序。所以使用 volatile 修饰 instance 之后，Double-Check 懒汉单例模式就万无一失了。</p>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式 + synchronized同步锁 + double-check</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">static</span> Singleton instance= <span class="literal">null</span>;<span class="comment">//不实例化</span></span><br><span class="line">    <span class="keyword">public</span> List&lt;String&gt; list = <span class="literal">null</span>;<span class="comment">//list属性</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;</span><br><span class="line">      list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();</span><br><span class="line">    &#125;<span class="comment">//构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;<span class="comment">//加同步锁，通过该函数向整个系统提供实例</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//第一次判断，当instance为null时，则实例化对象，否则直接返回对象</span></span><br><span class="line">          <span class="keyword">synchronized</span> (Singleton.class)&#123;<span class="comment">//同步锁</span></span><br><span class="line">             <span class="keyword">if</span>(<span class="literal">null</span> == instance)&#123;<span class="comment">//第二次判断</span></span><br><span class="line">                instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//实例化对象</span></span><br><span class="line">             &#125;</span><br><span class="line">          &#125; </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;<span class="comment">//返回已存在的对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
-
-<h3 id="通过内部类实现"><a href="#通过内部类实现" class="headerlink" title="通过内部类实现"></a>通过内部类实现</h3><p>以上这种同步锁 +Double-Check 的实现方式相对来说，复杂且加了同步锁，那有没有稍微简单一点儿的可以实现线程安全的懒加载方式呢？</p>
-<p>我们知道，在饿汉模式中，我们使用了 static 修饰了成员变量 instance，所以该变量会在类初始化的过程中被收集进类构造器即<code>&lt;clinit&gt;</code>方法中。在多线程场景下，JVM 会保证只有一个线程能执行该类的<code>&lt;clinit&gt;</code>方法，其它线程将会被阻塞等待。这种方式可以保证内存的可见性、顺序性以及原子性。</p>
-<p>如果我们在 Singleton 类中创建一个内部类来实现成员变量的初始化，则可以避免多线程下重复创建对象的情况发生。这种方式，只有在第一次调用 getInstance() 方法时，才会加载 InnerSingleton 类，而只有在加载 InnerSingleton 类之后，才会实例化创建对象。具体实现如下：</p>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//懒汉模式 内部类实现</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">  <span class="keyword">public</span> List&lt;String&gt; list = <span class="literal">null</span>;<span class="comment">// list属性</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span> &#123;<span class="comment">//构造函数</span></span><br><span class="line">    list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 内部类实现</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">InnerSingleton</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance=<span class="keyword">new</span> <span class="title class_">Singleton</span>();<span class="comment">//自行创建实例</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> InnerSingleton.instance;<span class="comment">// 返回内部类中的静态变量</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
-
-<p><strong>使用枚举来实现单例模式</strong>，具体代码如下：</p>
-<div class="highlight-wrap"autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true"data-rel="JAVA"><figure class="iseeu highlight /java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SinletonExample</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">SinletonExample</span> <span class="variable">instance</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 私有构造函数</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">SinletonExample</span><span class="params">()</span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> SinletonExample <span class="title function_">getInstance</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Sinleton.SINLETON.getInstance();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">enum</span> <span class="title class_">Sinleton</span>&#123;</span><br><span class="line">        SINLETON;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> SinletonExample singleton;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// JVM保证这个方法只调用一次</span></span><br><span class="line">        Sinleton()&#123;</span><br><span class="line">            singleton = <span class="keyword">new</span> <span class="title class_">SinletonExample</span>();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> SinletonExample <span class="title function_">getInstance</span><span class="params">()</span>&#123;</span><br><span class="line">            <span class="keyword">return</span> singleton;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
-
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>单例的实现方式其实有很多，但总结起来就两种：饿汉模式和懒汉模式，我们可以根据自己的需求来做选择。</p>
-<p>如果我们在程序启动后，一定会加载到类，那么用饿汉模式实现的单例简单又实用；如果我们是写一些工具类，则优先考虑使用懒汉模式，因为很多项目可能会引用到 jar 包，但未必会使用到这个工具类，<strong>懒汉模式实现的单例可以避免提前被加载到内存中，占用系统资源</strong>。</p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Java性能调优</tag>
-        <tag>设计模式</tag>
       </tags>
   </entry>
 </search>
