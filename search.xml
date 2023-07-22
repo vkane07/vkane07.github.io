@@ -98,7 +98,7 @@
     <title>yun</title>
     <url>/posts/1545816865.html</url>
     <content><![CDATA[<p>图片</p>
-<p><img src="/nginx.png" alt="nginx"></p>
+<p><img src="/posts/1545816865/nginx.png" alt="nginx"></p>
 ]]></content>
   </entry>
   <entry>
@@ -150,7 +150,7 @@
 </li>
 </ol>
 <p><img src="/images/nginx.png" alt="nginx"></p>
-<p><img src="/images/nginx.png" alt="nginx"></p>
+<p><img src="/../images/nginx.png" alt="nginx"></p>
 <ol start="4">
 <li>使用命令重启nginx</li>
 </ol>

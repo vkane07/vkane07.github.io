@@ -2073,7 +2073,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #307855;
+  background: #3737f6;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -3104,7 +3104,7 @@ p {
   margin: inherit;
 }
 .back-to-top .fa-arrow-up:before {
-  color: #9369d1;
+  color: #11a6b8;
 }
 .sidebar-toggle {
   left: 30px;
