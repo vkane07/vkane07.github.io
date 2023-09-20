@@ -1391,7 +1391,7 @@
   </entry>
   <entry>
     <title>leetcode算法</title>
-    <url>/posts/2823024016.html</url>
+    <url>/posts/28230240165.html</url>
     <content><![CDATA[<p>leetcode算法练习。</p>
 <h3 id="1135最低成本联通所有城市"><a href="#1135最低成本联通所有城市" class="headerlink" title="1135最低成本联通所有城市"></a><a href="https://leetcode.cn/problems/connecting-cities-with-minimum-cost">1135最低成本联通所有城市</a></h3><p><strong>最小生成树</strong> 图的生成树是一棵含有其所有的顶点的无环联通子图，一幅加权图的最小生成树（ MST ） 是它的一颗权值（树中所有边的权值之和）最小的生成树。</p>
 <p><strong>并查集</strong> 并查集是一种树型的数据结构，用于处理一些不相交集合的合并及查询问题。常常在使用中以森林来表示。</p>
